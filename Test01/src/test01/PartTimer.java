@@ -1,10 +1,9 @@
 package test01;
 
-public class PartTimer extends Employee {
+public class PartTimer {
     private int hoursWorked;
 
     public PartTimer(String name, String position, int hoursWorked) {
-        super(name, position);
         this.hoursWorked = hoursWorked;
     }
 

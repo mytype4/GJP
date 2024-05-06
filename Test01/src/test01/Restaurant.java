@@ -18,10 +18,7 @@ public class Restaurant {
         menus.add(menu);
     }
 
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-    // 추가 메소드 구현
+    public String getName() {
+        return name;
+    }
 }
