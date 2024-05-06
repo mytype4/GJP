@@ -1,10 +1,15 @@
 package test01;
 
-public class PartTimer {
+public class PartTimer extends Person{
     private int hoursWorked;
+    
+    public PartTimer(String name) {
+    	super(name);
+    }
 
     public PartTimer(String name, String position, int hoursWorked) {
-        this.hoursWorked = hoursWorked;
+        super(name);
+    	this.hoursWorked = hoursWorked;
     }
 
     public void serveCustomer(Customer customer, Menu menu) {
