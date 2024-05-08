@@ -1,26 +1,31 @@
 package test01;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Main {
     public static void main(String[] args) {
-        List<Owner> owners = new ArrayList<>();
-        owners.add(new Owner("Alice"));
-        owners.add(new Owner("Bob"));
-        owners.add(new Owner("Charlie"));
-        owners.add(new Owner("David"));
-        owners.add(new Owner("Eva"));
-        owners.add(new Owner("Frank"));
-        owners.add(new Owner("George"));
-        owners.add(new Owner("Hannah"));
+        // 소유자 생성
+        Owner restaurantOwner = new Owner("Alice");
 
-        // 각 사장이 음식점을 생성
-        String[] locations = {"Downtown", "Uptown", "Midtown", "Eastside", "Westside", "North Hills", "South Valley", "Central Park"};
-        for (int i = 0; i < owners.size(); i++) {
-            String restaurantName = "Restaurant " + (i + 1);
-            String location = locations[i % locations.length];
-            owners.get(i).createRestaurant(restaurantName, location);
-        }
+        // 식당 생성
+        Restaurant gourmetPalace = restaurantOwner.createRestaurant("Gourmet Palace");
+
+        // 직원 고용
+        PartTimer waiter = new PartTimer("Bob");
+        restaurantOwner.hirePartTimer(gourmetPalace, waiter);
+
+        // 메뉴 추가
+        Menu pizza = new Menu("Pizza", 12.99);
+        Menu burger = new Menu("Burger", 8.99);
+        restaurantOwner.addMenuToRestaurant(gourmetPalace, pizza);
+        restaurantOwner.addMenuToRestaurant(gourmetPalace, burger);
+
+        // 고객 생성 및 방문
+        Customer customer1 = new Customer("Eve");
+        customer1.visitRestaurant(gourmetPalace);
+
+        // 음식 주문
+        customer1.orderFood();
+
+        // 레스토랑 떠나기
+        customer1.leaveRestaurant();
     }
 }

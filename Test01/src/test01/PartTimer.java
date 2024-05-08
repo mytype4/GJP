@@ -1,29 +1,20 @@
 package test01;
 
-public class PartTimer extends Person{
-    private int hoursWorked;
-    
+class PartTimer extends Person {
     public PartTimer(String name) {
-    	super(name);
-    }
-
-    public PartTimer(String name, String position, int hoursWorked) {
         super(name);
-    	this.hoursWorked = hoursWorked;
     }
 
-    public void serveCustomer(Customer customer, Menu menu) {
-        System.out.println(getName() + " is serving " + customer.getName() + " with " + menu.getDishName());
-        // 고객 서빙 로직 구현
+    @Override
+    public void introduce() {
+        System.out.println("Hello, I am a PartTimer named " + getName());
     }
 
-    public String getName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public void work() {
+        System.out.println(getName() + " is working part-time.");
+    }
 
-	public void prepareFood() {
-        System.out.println(getName() + " is preparing food in the kitchen.");
-        // 음식 준비 로직 구현
+    public void requestTimeOff() {
+        System.out.println(getName() + " is requesting time off.");
     }
 }

@@ -1,69 +1,64 @@
 package test01;
 
-public class Customer extends Person {
+import java.util.List;
+import java.util.Scanner;
+
+class Customer extends Person {
+    private Restaurant currentRestaurant;
+
     public Customer(String name) {
-        super(name);  // Person 클래스의 생성자를 호출하여 이름을 설정합니다.
+        super(name);
     }
 
-    public void orderFood(Restaurant restaurant, Menu menu) {
-        System.out.println(getName() + " has ordered " + menu.getDishName() + " from " + restaurant.getName());
+    @Override
+    public void introduce() {
+        System.out.println("Hello, I am a Customer named " + getName());
     }
 
-    public void leaveFeedback(Restaurant restaurant, String feedback) {
-        System.out.println("Feedback from " + getName() + " for " + restaurant.getName() + ": " + feedback);
+    // 레스토랑 방문
+    public void visitRestaurant(Restaurant restaurant) {
+        if (currentRestaurant != null) {
+            leaveRestaurant();
+        }
+        currentRestaurant = restaurant;
+        restaurant.addCustomer(this);
     }
 
-	@Override
-	public String getId() {
-		// TODO Auto-generated method stub
-		return super.getId();
-	}
+    // 레스토랑에서 메뉴 주문
+    public void orderFood() {
+        if (currentRestaurant == null) {
+            System.out.println(getName() + " is not currently visiting any restaurant.");
+            return;
+        }
 
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return super.getName();
-	}
+        List<Menu> menus = currentRestaurant.getMenus();
+        if (menus.isEmpty()) {
+            System.out.println("No menu items available at " + currentRestaurant.getName());
+            return;
+        }
 
-	@Override
-	public int getWealth() {
-		// TODO Auto-generated method stub
-		return super.getWealth();
-	}
+        System.out.println("Menu items available at " + currentRestaurant.getName() + ":");
+        for (int i = 0; i < menus.size(); i++) {
+            System.out.println((i + 1) + ". " + menus.get(i).getName() + ": $" + menus.get(i).getPrice());
+        }
 
-	@Override
-	public void setWealth(int wealth) {
-		// TODO Auto-generated method stub
-		super.setWealth(wealth);
-	}
+        System.out.println("Which menu item would you like to order?");
+        Scanner scanner = new Scanner(System.in);
+        int choice = scanner.nextInt() - 1;
 
-	@Override
-	public void goToRestaurant() {
-		// TODO Auto-generated method stub
-		super.goToRestaurant();
-	}
+        if (choice >= 0 && choice < menus.size()) {
+            System.out.println(getName() + " has ordered " + menus.get(choice).getName() + ".");
+        } else {
+            System.out.println("Invalid choice.");
+        }
+    }
 
-	@Override
-	public void orderFood(int price) {
-		// TODO Auto-generated method stub
-		super.orderFood(price);
-	}
-
-	@Override
-	public void eat() {
-		// TODO Auto-generated method stub
-		super.eat();
-	}
-
-	@Override
-	public void pay(int amount) {
-		// TODO Auto-generated method stub
-		super.pay(amount);
-	}
-
-	@Override
-	public String toString() {
-		// TODO Auto-generated method stub
-		return super.toString();
-	}
+    // 레스토랑에서 나가기
+    public void leaveRestaurant() {
+        if (currentRestaurant != null) {
+            currentRestaurant.removeCustomer(this);
+            System.out.println(getName() + " has left " + currentRestaurant.getName());
+            currentRestaurant = null;
+        }
+    }
 }
