@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 class Customer extends Person {
     private Restaurant currentRestaurant;
+    private Owner currentOwner;
 
     public Customer(String name) {
         super(name);
@@ -16,12 +17,15 @@ class Customer extends Person {
     }
 
     // 레스토랑 방문
-    public void visitRestaurant(Restaurant restaurant) {
-        if (currentRestaurant != null) {
+    public void visitRestaurant(Restaurant restaurant, Owner owner) {
+        if (currentRestaurant != null && currentOwner != null) {
             leaveRestaurant();
         }
         currentRestaurant = restaurant;
         restaurant.addCustomer(this);
+        
+        currentOwner = owner;
+        
     }
 
     // 레스토랑에서 메뉴 주문
@@ -48,6 +52,7 @@ class Customer extends Person {
 
         if (choice >= 0 && choice < menus.size()) {
             System.out.println(getName() + " has ordered " + menus.get(choice).getName() + ".");
+            this.pay(currentOwner, menus.get(choice).getPrice());
         } else {
             System.out.println("Invalid choice.");
         }

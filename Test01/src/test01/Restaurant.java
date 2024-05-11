@@ -21,6 +21,10 @@ class Restaurant {
     public String getName() {
         return name;
     }
+    
+    public Owner getOwner() {
+    	return owner;
+    }
 
     public List<Menu> getMenus() {
         return menus;
