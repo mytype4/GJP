@@ -51,6 +51,8 @@ class Customer extends Person {
         } else {
             System.out.println("Invalid choice.");
         }
+        
+       scanner.close();
     }
 
     // 레스토랑에서 나가기
