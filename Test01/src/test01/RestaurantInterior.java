@@ -3,18 +3,21 @@ package test01;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import java.awt.Graphics;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.List;
+import java.util.Random;
 
 public class RestaurantInterior extends JPanel implements ActionListener {
     private static final long serialVersionUID = 1L;
     private Restaurant restaurant;
-    private int redRectX = 50; // 빨간 네모의 초기 x 좌표
-    private int redRectY = 100; // 빨간 네모의 초기 y 좌표
+    private int redRectX; // 빨간 네모의 초기 x 좌표
+    private int redRectY; // 빨간 네모의 초기 y 좌표
     private final int RECT_SIZE = 20; // 빨간 네모의 크기
     private final int STEP = 5;  // 캐릭터 이동 속도
     private Timer timer;
@@ -76,9 +79,12 @@ public class RestaurantInterior extends JPanel implements ActionListener {
         timer = new Timer(10, this);  // 타이머 간격을 10ms로 설정
         timer.start();
 
-        // 빨간 네모 초기 위치 설정: 출구보다 살짝 위에 위치
-        redRectX = getWidth() / 2 - RECT_SIZE / 2;
-        redRectY = getHeight() - EXIT_HEIGHT - RECT_SIZE - 10;
+        // UI가 초기화된 후에 빨간 네모 초기 위치 설정: 출구보다 살짝 위에 위치
+        SwingUtilities.invokeLater(() -> {
+            redRectX = (getWidth() - RECT_SIZE) / 2;
+            redRectY = getHeight() - EXIT_HEIGHT - RECT_SIZE - 10; // 출구보다 10픽셀 위
+            repaint();
+        });
     }
 
     @Override
@@ -136,4 +142,3 @@ public class RestaurantInterior extends JPanel implements ActionListener {
         timer.stop(); // 타이머 정지
     }
 }
-

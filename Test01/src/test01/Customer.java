@@ -1,7 +1,7 @@
 package test01;
 
 import java.util.List;
-import java.util.Scanner;
+import java.util.Random;
 
 class Customer extends Person {
     private Restaurant currentRestaurant;
@@ -27,44 +27,49 @@ class Customer extends Person {
         currentOwner = owner;
     }
 
-    // 레스토랑에서 메뉴 주문
-    public void orderFood() {
-        if (currentRestaurant == null) {
-            System.out.println(getName() + " is not currently visiting any restaurant.");
-            return;
-        }
-
-        List<Menu> menus = currentRestaurant.getMenus();
-        if (menus.isEmpty()) {
-            System.out.println("No menu items available at " + currentRestaurant.getName());
-            return;
-        }
-
-        System.out.println("Menu items available at " + currentRestaurant.getName() + ":");
-        for (int i = 0; i < menus.size(); i++) {
-            System.out.println((i + 1) + ". " + menus.get(i).getName() + ": $" + menus.get(i).getPrice());
-        }
-
-        System.out.println("Which menu item would you like to order?");
-        Scanner scanner = new Scanner(System.in);
-        int choice = scanner.nextInt() - 1;
-
-        if (choice >= 0 && choice < menus.size()) {
-            System.out.println(getName() + " has ordered " + menus.get(choice).getName() + ".");
-            this.pay(currentOwner, menus.get(choice).getPrice());
-        } else {
-            System.out.println("Invalid choice.");
-        }
-        
-        scanner.close();
-    }
-
     // 레스토랑에서 나가기
     public void leaveRestaurant() {
         if (currentRestaurant != null) {
             currentRestaurant.removeCustomer(this);
             System.out.println(getName() + " has left " + currentRestaurant.getName());
             currentRestaurant = null;
+            currentOwner = null;
         }
+    }
+
+    // 레스토랑에서 메뉴 주문
+    public void orderFood(String restaurantName, String menuName) {
+        if (currentRestaurant == null || !currentRestaurant.getName().equals(restaurantName)) {
+            System.out.println("Customer is not currently visiting " + restaurantName);
+            return;
+        }
+
+        List<Menu> menus = currentRestaurant.getMenus();
+        for (Menu menu : menus) {
+            if (menu.getName().equals(menuName)) {
+                System.out.println(getName() + " has ordered " + menuName + " at " + restaurantName + ".");
+                this.pay(currentOwner, menu.getPrice());
+                return;
+            }
+        }
+        System.out.println("Menu item " + menuName + " not found in " + restaurantName);
+    }
+
+    // 메뉴를 임의로 선택하고 행동하는 메서드
+    public void autoSelectAndOrder(List<Menu> menuList, List<Owner> owners) {
+        Random random = new Random();
+        Menu selectedMenu = menuList.get(random.nextInt(menuList.size()));
+
+        for (Owner owner : owners) {
+            for (Restaurant restaurant : owner.getRestaurants()) {
+                if (restaurant.getMenus().contains(selectedMenu)) {
+                    visitRestaurant(restaurant, owner);
+                    orderFood(restaurant.getName(), selectedMenu.getName());
+                    leaveRestaurant();
+                    return;
+                }
+            }
+        }
+        System.out.println("No restaurant found for the selected menu item.");
     }
 }
