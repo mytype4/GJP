@@ -15,8 +15,8 @@ public class Main {
         // 메뉴 추가
         Menu pizza = new Menu("Pizza", 12.99);
         Menu burger = new Menu("Burger", 8.99);
-        restaurantOwner.addMenuToRestaurant(gourmetPalace, pizza);
-        restaurantOwner.addMenuToRestaurant(gourmetPalace, burger);
+//        restaurantOwner.addMenuToRestaurant(gourmetPalace, pizza);
+//        restaurantOwner.addMenuToRestaurant(gourmetPalace, burger);
 
         // 고객 생성 및 방문
         Customer customer1 = new Customer("Eve");

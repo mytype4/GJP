@@ -6,7 +6,7 @@ import java.util.Scanner;
 class Customer extends Person {
     private Restaurant currentRestaurant;
     private Owner currentOwner;
-
+    
     public Customer(String name) {
         super(name);
     }
@@ -25,7 +25,6 @@ class Customer extends Person {
         restaurant.addCustomer(this);
         
         currentOwner = owner;
-        
     }
 
     // 레스토랑에서 메뉴 주문

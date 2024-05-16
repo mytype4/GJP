@@ -9,8 +9,35 @@ class Restaurant {
     private List<PartTimer> partTimers;
     private List<Customer> customers;
     private List<Menu> menus;
+    private int x, y;
+    private final int SIZE = 50; // 음식점 크기
 
-    public Restaurant(String name, Owner owner) {
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public int getSize() {
+        return SIZE;
+    }
+
+    public Restaurant() {
+		this.name = "";
+		this.owner = null;
+	}
+
+	public Restaurant(String name, Owner owner) {
         this.name = name;
         this.owner = owner;
         this.partTimers = new ArrayList<>();
