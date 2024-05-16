@@ -28,7 +28,7 @@ class Owner extends Person {
     public void addMenuToRestaurant(String restaurantName, String menuName, int menuPrice, List<Menu> menuList) {
         Restaurant restaurant = findRestaurantByName(restaurantName);
         if (restaurant != null) {
-            Menu menu = new Menu(menuName, menuPrice);
+            Menu menu = new Menu(menuName, menuPrice, restaurant);
             restaurant.addMenu(menu);
             menuList.add(menu); // menuList에도 메뉴 추가
             System.out.println(menu.getName() + " has been added to the menu at " + restaurant.getName());

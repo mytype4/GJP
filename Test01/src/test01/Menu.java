@@ -1,19 +1,25 @@
 package test01;
 
-class Menu {
-    private final String name;
-    private final double price;
+public class Menu {
+    private String name;
+    private int price;
+    private Restaurant restaurant; // 메뉴가 속한 레스토랑
 
-    public Menu(String name, double price) {
+    public Menu(String name, int price, Restaurant restaurant) {
         this.name = name;
         this.price = price;
+        this.restaurant = restaurant;
     }
 
     public String getName() {
         return name;
     }
 
-    public double getPrice() {
+    public int getPrice() {
         return price;
+    }
+
+    public Restaurant getRestaurant() {
+        return restaurant;
     }
 }

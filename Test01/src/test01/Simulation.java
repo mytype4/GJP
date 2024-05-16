@@ -2,6 +2,10 @@ package test01;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Simulation {
 
@@ -30,9 +34,31 @@ public class Simulation {
         owners.get(1).createRestaurant("광운이네");
         owners.get(1).createRestaurant("광운광운이");
 
-        // 고객이 자동으로 메뉴를 선택하고 주문하는 과정 실행
+        // 비동기적으로 고객들이 행동하게 하기 위한 스케줄러 설정
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(customers.size());
         for (Customer customer : customers) {
-            customer.autoSelectAndOrder(menuList, owners);
+            scheduler.scheduleAtFixedRate(() -> customer.autoSelectAndOrder(menuList), 0, 30, TimeUnit.SECONDS);
         }
+
+        // 키보드 입력을 통해 프로그램 종료
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Type 'exit' to stop the simulation.");
+
+        while (true) {
+            String input = scanner.nextLine();
+            if ("exit".equalsIgnoreCase(input)) {
+                break;
+            }
+        }
+
+        // 프로그램 종료시 스케줄러 종료
+        System.out.println("Shutting down...");
+        scheduler.shutdown();
+        for (Customer customer : customers) {
+            customer.shutdownScheduler();
+        }
+
+        System.out.println("Simulation stopped.");
+        scanner.close();
     }
 }

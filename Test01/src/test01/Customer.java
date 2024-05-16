@@ -2,10 +2,14 @@ package test01;
 
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 class Customer extends Person {
     private Restaurant currentRestaurant;
     private Owner currentOwner;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     
     public Customer(String name) {
         super(name);
@@ -56,20 +60,27 @@ class Customer extends Person {
     }
 
     // 메뉴를 임의로 선택하고 행동하는 메서드
-    public void autoSelectAndOrder(List<Menu> menuList, List<Owner> owners) {
+    public void autoSelectAndOrder(List<Menu> menuList) {
         Random random = new Random();
         Menu selectedMenu = menuList.get(random.nextInt(menuList.size()));
+        Restaurant restaurant = selectedMenu.getRestaurant();
 
-        for (Owner owner : owners) {
-            for (Restaurant restaurant : owner.getRestaurants()) {
-                if (restaurant.getMenus().contains(selectedMenu)) {
-                    visitRestaurant(restaurant, owner);
+        if (restaurant != null) {
+            // 방문, 주문, 떠나는 과정을 비동기적으로 처리
+            scheduler.schedule(() -> {
+                visitRestaurant(restaurant, restaurant.getOwner());
+                scheduler.schedule(() -> {
                     orderFood(restaurant.getName(), selectedMenu.getName());
-                    leaveRestaurant();
-                    return;
-                }
-            }
+                    scheduler.schedule(this::leaveRestaurant, random.nextInt(10) + 5, TimeUnit.SECONDS);
+                }, random.nextInt(10) + 5, TimeUnit.SECONDS);
+            }, random.nextInt(10) + 5, TimeUnit.SECONDS);
+        } else {
+            System.out.println("No restaurant found for the selected menu item.");
         }
-        System.out.println("No restaurant found for the selected menu item.");
+    }
+
+    // 스케줄러 종료 메서드
+    public void shutdownScheduler() {
+        scheduler.shutdown();
     }
 }
