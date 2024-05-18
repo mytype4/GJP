@@ -2,17 +2,18 @@ package test01;
 
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 class Customer extends Person {
     private Restaurant currentRestaurant;
     private Owner currentOwner;
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    
+    private ScheduledExecutorService scheduler;
+
     public Customer(String name) {
         super(name);
+        this.scheduler = Executors.newScheduledThreadPool(1); // 각 Customer마다 스케줄러 생성
     }
 
     @Override
@@ -27,7 +28,6 @@ class Customer extends Person {
         }
         currentRestaurant = restaurant;
         restaurant.addCustomer(this);
-        
         currentOwner = owner;
     }
 
@@ -60,27 +60,60 @@ class Customer extends Person {
     }
 
     // 메뉴를 임의로 선택하고 행동하는 메서드
-    public void autoSelectAndOrder(List<Menu> menuList) {
+    public void autoSelectAndOrder() {
         Random random = new Random();
-        Menu selectedMenu = menuList.get(random.nextInt(menuList.size()));
-        Restaurant restaurant = selectedMenu.getRestaurant();
+        List<Menu> menuList = Simulation.getMenuList();
 
-        if (restaurant != null) {
-            // 방문, 주문, 떠나는 과정을 비동기적으로 처리
-            scheduler.schedule(() -> {
-                visitRestaurant(restaurant, restaurant.getOwner());
-                scheduler.schedule(() -> {
+        if (menuList.isEmpty()) {
+            System.out.println("No menu items available.");
+            return;
+        }
+
+        // 랜덤으로 메뉴를 선택
+        Menu selectedMenu = menuList.get(random.nextInt(menuList.size()));
+
+        // 선택된 메뉴를 소유한 레스토랑을 찾고 주문
+        for (Owner owner : Simulation.getOwners()) {
+            for (Restaurant restaurant : owner.getRestaurants()) {
+                if (restaurant.getMenus().contains(selectedMenu)) {
+                    visitRestaurant(restaurant, owner);
+                    sleepRandomTime(1000, 2000); // 1~2초 대기
                     orderFood(restaurant.getName(), selectedMenu.getName());
-                    scheduler.schedule(this::leaveRestaurant, random.nextInt(10) + 5, TimeUnit.SECONDS);
-                }, random.nextInt(10) + 5, TimeUnit.SECONDS);
-            }, random.nextInt(10) + 5, TimeUnit.SECONDS);
-        } else {
-            System.out.println("No restaurant found for the selected menu item.");
+                    sleepRandomTime(1000, 2000); // 1~2초 대기
+                    leaveRestaurant();
+                    return;
+                }
+            }
+        }
+        System.out.println("No restaurant found for the selected menu item.");
+    }
+
+    // 스케줄러 시작
+    public void startScheduler() {
+        scheduler.scheduleWithFixedDelay(() -> autoSelectAndOrder(), 0, 10, TimeUnit.SECONDS);
+    }
+
+    // 스케줄러 종료
+    public void shutdownScheduler() {
+        scheduler.shutdownNow(); // 즉시 종료
+        try {
+            if (!scheduler.awaitTermination(10, TimeUnit.SECONDS)) { // 10초 동안 종료를 기다림
+                System.err.println("Scheduler did not terminate");
+            }
+        } catch (InterruptedException ie) {
+            scheduler.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 
-    // 스케줄러 종료 메서드
-    public void shutdownScheduler() {
-        scheduler.shutdown();
+    // 랜덤한 시간 동안 대기하는 메서드
+    private void sleepRandomTime(int minMillis, int maxMillis) {
+        Random random = new Random();
+        int sleepTime = minMillis + random.nextInt(maxMillis - minMillis + 1);
+        try {
+            Thread.sleep(sleepTime);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

@@ -25,12 +25,12 @@ class Owner extends Person {
     }
 
     // 특정 레스토랑 이름으로 메뉴 추가
-    public void addMenuToRestaurant(String restaurantName, String menuName, int menuPrice, List<Menu> menuList) {
+    public void addMenuToRestaurant(String restaurantName, String menuName, int menuPrice) {
         Restaurant restaurant = findRestaurantByName(restaurantName);
         if (restaurant != null) {
             Menu menu = new Menu(menuName, menuPrice, restaurant);
             restaurant.addMenu(menu);
-            menuList.add(menu); // menuList에도 메뉴 추가
+            Simulation.addMenu(menu); // Simulation 클래스의 menuList에도 메뉴 추가
             System.out.println(menu.getName() + " has been added to the menu at " + restaurant.getName());
         } else {
             System.out.println("Error: No restaurant found with the name " + restaurantName);
