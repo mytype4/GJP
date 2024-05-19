@@ -33,16 +33,21 @@ class Restaurant {
     }
 
     public Restaurant() {
-		this.name = "";
-		this.owner = null;
-	}
+        this.name = "";
+        this.owner = null;
+        this.partTimers = new ArrayList<>();
+        this.customers = new ArrayList<>();
+        this.menus = new ArrayList<>();
+        SimulationManager.getInstance().addRestaurant(this); // SimulationManager에 추가
+    }
 
-	public Restaurant(String name, Owner owner) {
+    public Restaurant(String name, Owner owner) {
         this.name = name;
         this.owner = owner;
         this.partTimers = new ArrayList<>();
         this.customers = new ArrayList<>();
         this.menus = new ArrayList<>();
+        SimulationManager.getInstance().addRestaurant(this); // SimulationManager에 추가
     }
 
     public String getName() {
@@ -50,7 +55,7 @@ class Restaurant {
     }
     
     public Owner getOwner() {
-    	return owner;
+        return owner;
     }
 
     public List<Menu> getMenus() {

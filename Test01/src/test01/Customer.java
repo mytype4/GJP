@@ -2,8 +2,8 @@ package test01;
 
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 class Customer extends Person {
@@ -13,6 +13,7 @@ class Customer extends Person {
 
     public Customer(String name) {
         super(name);
+        SimulationManager.getInstance().addCustomer(this);
         this.scheduler = Executors.newScheduledThreadPool(1); // 각 Customer마다 스케줄러 생성
     }
 
@@ -62,7 +63,7 @@ class Customer extends Person {
     // 메뉴를 임의로 선택하고 행동하는 메서드
     public void autoSelectAndOrder() {
         Random random = new Random();
-        List<Menu> menuList = Simulation.getMenuList();
+        List<Menu> menuList = SimulationManager.getInstance().getMenuList();
 
         if (menuList.isEmpty()) {
             System.out.println("No menu items available.");
@@ -73,7 +74,7 @@ class Customer extends Person {
         Menu selectedMenu = menuList.get(random.nextInt(menuList.size()));
 
         // 선택된 메뉴를 소유한 레스토랑을 찾고 주문
-        for (Owner owner : Simulation.getOwners()) {
+        for (Owner owner : SimulationManager.getInstance().getOwners()) {
             for (Restaurant restaurant : owner.getRestaurants()) {
                 if (restaurant.getMenus().contains(selectedMenu)) {
                     visitRestaurant(restaurant, owner);

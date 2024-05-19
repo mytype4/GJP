@@ -8,7 +8,6 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import javax.swing.JFrame;
@@ -17,18 +16,20 @@ import javax.swing.Timer;
 
 public class MovingCharacter extends JPanel implements ActionListener {
     private static final long serialVersionUID = 1L;
-    private int x = 50;
-    private int y = 50;
+    private int x;
+    private int y;
     private final int STEP = 5;  // 캐릭터 이동 속도
     private final int RECT_SIZE = 20;  // 빨간 네모의 크기
     private boolean leftPressed, rightPressed, upPressed, downPressed;
     private Timer timer;
-    private List<Restaurant> restaurants; // 레스토랑 리스트
     private JFrame frame; // JFrame 객체를 저장
+    private List<Restaurant> restaurants;
+    private Me me;
 
-    public MovingCharacter(List<Restaurant> restaurants, JFrame frame) {
-        this.restaurants = restaurants;
+    public MovingCharacter(JFrame frame) {
         this.frame = frame;
+        this.restaurants = SimulationManager.getInstance().getRestaurants();
+        this.me = new Me("MyCharacter");
         setFocusable(true);
         addKeyListener(new KeyAdapter() {
             @Override
@@ -77,10 +78,10 @@ public class MovingCharacter extends JPanel implements ActionListener {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                // 레스토랑 객체들의 랜덤 위치 설정
                 for (Restaurant restaurant : restaurants) {
                     setRandomPosition(restaurant);
                 }
+                setInitialCharacterPosition();  // 레스토랑 객체가 설정된 후 빨간 네모의 초기 위치 설정
                 repaint();
             }
         });
@@ -105,50 +106,86 @@ public class MovingCharacter extends JPanel implements ActionListener {
             randX = rand.nextInt(getWidth() - restaurant.getSize());
             randY = rand.nextInt(getHeight() - restaurant.getSize());
 
-            // 기존 음식점들과 겹치는지 확인
             for (Restaurant r : restaurants) {
                 if (Math.abs(r.getX() - randX) < restaurant.getSize() && Math.abs(r.getY() - randY) < restaurant.getSize()) {
                     overlap = true;
                     break;
                 }
             }
-
         } while (overlap);
 
         restaurant.setX(randX);
         restaurant.setY(randY);
     }
 
-    // 특정 레스토랑 근처에 위치 설정
-    public void setPositionNearRestaurant(Restaurant restaurant) {
+    // 빨간 네모의 초기 위치 설정
+    private void setInitialCharacterPosition() {
         Random rand = new Random();
         int randX, randY;
         boolean overlap;
-        int attempts = 0;
-        int maxAttempts = 100; // 최대 시도 횟수
 
         do {
             overlap = false;
-            randX = restaurant.getX() + restaurant.getSize() + 10 + rand.nextInt(50);
-            randY = restaurant.getY() + restaurant.getSize() + 10 + rand.nextInt(50);
+            randX = rand.nextInt(getWidth() - RECT_SIZE);
+            randY = rand.nextInt(getHeight() - RECT_SIZE);
 
-            // 화면 경계를 넘어가지 않도록 x, y 좌표 제한
-            if (randX < 0) randX = 0;
-            if (randX > getWidth() - RECT_SIZE) randX = getWidth() - RECT_SIZE;
-            if (randY < 0) randY = 0;
-            if (randY > getHeight() - RECT_SIZE) randY = getHeight() - RECT_SIZE;
-
-            // 기존 음식점들과 겹치는지 확인
-            for (Restaurant r : restaurants) {
-                if (r != restaurant && Math.abs(r.getX() - randX) < restaurant.getSize() && Math.abs(r.getY() - randY) < restaurant.getSize()) {
+            for (Restaurant restaurant : restaurants) {
+                if (Math.abs(restaurant.getX() - randX) < restaurant.getSize() + RECT_SIZE &&
+                    Math.abs(restaurant.getY() - randY) < restaurant.getSize() + RECT_SIZE) {
                     overlap = true;
                     break;
                 }
             }
-            attempts++;
-        } while (overlap && attempts < maxAttempts);
+        } while (overlap);
 
-        // 빨간 네모의 위치 설정
+        this.x = randX;
+        this.y = randY;
+    }
+    
+    public void setPositionNearRestaurant(Restaurant restaurant) {
+        Random rand = new Random();
+        int randX, randY;
+        boolean overlap;
+
+        do {
+            overlap = false;
+            int direction = rand.nextInt(4); // 0: 상, 1: 하, 2: 좌, 3: 우
+            int offset = restaurant.getSize() + RECT_SIZE;
+
+            switch (direction) {
+                case 0: // 상
+                    randX = restaurant.getX() + rand.nextInt(restaurant.getSize() - RECT_SIZE);
+                    randY = restaurant.getY() - offset;
+                    break;
+                case 1: // 하
+                    randX = restaurant.getX() + rand.nextInt(restaurant.getSize() - RECT_SIZE);
+                    randY = restaurant.getY() + restaurant.getSize();
+                    break;
+                case 2: // 좌
+                    randX = restaurant.getX() - offset;
+                    randY = restaurant.getY() + rand.nextInt(restaurant.getSize() - RECT_SIZE);
+                    break;
+                case 3: // 우
+                    randX = restaurant.getX() + restaurant.getSize();
+                    randY = restaurant.getY() + rand.nextInt(restaurant.getSize() - RECT_SIZE);
+                    break;
+                default:
+                    randX = restaurant.getX();
+                    randY = restaurant.getY();
+            }
+
+            if (randX < 0 || randX > getWidth() - RECT_SIZE || randY < 0 || randY > getHeight() - RECT_SIZE) {
+                overlap = true;
+            } else {
+                for (Restaurant r : restaurants) {
+                    if (Math.abs(r.getX() - randX) < r.getSize() && Math.abs(r.getY() - randY) < r.getSize()) {
+                        overlap = true;
+                        break;
+                    }
+                }
+            }
+        } while (overlap);
+
         this.x = randX;
         this.y = randY;
     }
@@ -158,35 +195,34 @@ public class MovingCharacter extends JPanel implements ActionListener {
         super.paintComponent(g);
 
         // 빨간 네모를 그립니다.
-        g.setColor(Color.RED); // 그리기 색상을 빨간색으로 설정
-        g.fillRect(x, y, RECT_SIZE, RECT_SIZE);  // 빨간 네모를 (x, y) 좌표에 RECT_SIZE 크기로 그리기
+        g.setColor(Color.RED);
+        g.fillRect(x, y, RECT_SIZE, RECT_SIZE);
 
         // 모든 음식점 객체들을 검정색 네모로 그립니다.
-        g.setColor(Color.BLACK); // 그리기 색상을 검정색으로 설정
+        g.setColor(Color.BLACK);
         for (Restaurant restaurant : restaurants) {
             g.fillRect(restaurant.getX(), restaurant.getY(), restaurant.getSize(), restaurant.getSize());
-            g.setColor(Color.WHITE); // 텍스트 배경을 흰색으로 설정
-            g.fillRect(restaurant.getX(), restaurant.getY() - 15, restaurant.getSize(), 15); // 텍스트 배경 네모
-            g.setColor(Color.BLACK); // 텍스트 색상을 검정으로 설정
-            g.drawString(restaurant.getName(), restaurant.getX() + 5, restaurant.getY() - 5); // 레스토랑 이름을 네모 위에 출력
+            g.setColor(Color.WHITE);
+            g.fillRect(restaurant.getX(), restaurant.getY() - 15, restaurant.getSize(), 15);
+            g.setColor(Color.BLACK);
+            g.drawString(restaurant.getName(), restaurant.getX() + 5, restaurant.getY() - 5);
         }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (leftPressed) x -= STEP; // 왼쪽 키가 눌린 상태이면 x 좌표를 STEP만큼 감소
-        if (rightPressed) x += STEP; // 오른쪽 키가 눌린 상태이면 x 좌표를 STEP만큼 증가
-        if (upPressed) y -= STEP; // 위쪽 키가 눌린 상태이면 y 좌표를 STEP만큼 감소
-        if (downPressed) y += STEP; // 아래쪽 키가 눌린 상태이면 y 좌표를 STEP만큼 증가
+        if (leftPressed) x -= STEP;
+        if (rightPressed) x += STEP;
+        if (upPressed) y -= STEP;
+        if (downPressed) y += STEP;
 
-        // 화면 경계를 넘어가지 않도록 x, y 좌표 제한
         if (x < 0) x = 0;
         if (x > getWidth() - RECT_SIZE) x = getWidth() - RECT_SIZE;
         if (y < 0) y = 0;
         if (y > getHeight() - RECT_SIZE) y = getHeight() - RECT_SIZE;
 
-        checkCollision(); // 충돌 감지 로직 호출
-        repaint(); // 화면을 다시 그리도록 요청
+        checkCollision();
+        repaint();
     }
 
     // 충돌 감지 메서드
@@ -204,47 +240,75 @@ public class MovingCharacter extends JPanel implements ActionListener {
 
     // 레스토랑 내부 화면으로 전환하는 메서드
     private void showRestaurantInterior(Restaurant restaurant) {
-        timer.stop(); // 타이머 정지
-        RestaurantInterior interiorPanel = new RestaurantInterior(restaurant, frame, this);
+        timer.stop();
+        RestaurantInterior interiorPanel = new RestaurantInterior(restaurant, frame, this, me);
         frame.setContentPane(interiorPanel);
         frame.revalidate();
-        interiorPanel.requestFocusInWindow(); // 내부 화면에서 키 입력을 받을 수 있도록 포커스 설정
-        interiorPanel.startTimer(); // 레스토랑 내부에서 타이머 시작
+        interiorPanel.requestFocusInWindow();
+        interiorPanel.startTimer();
     }
 
     public void startTimer() {
-        timer.start(); // 타이머 시작
+        timer.start();
     }
 
     public void stopTimer() {
-        timer.stop(); // 타이머 정지
+        timer.stop();
     }
 
     public static void main(String[] args) {
-        List<Customer> customers = new ArrayList<>();
-        List<Owner> owners = new ArrayList<>();
-        
-        // Customer 객체 리스트 생성
-        customers.add(new Customer("Customer1"));
-        customers.add(new Customer("Customer2"));
-        customers.add(new Customer("Customer3"));
+        SimulationManager manager = SimulationManager.getInstance();
 
-        // Owner 객체 리스트 생성
-        owners.add(new Owner("Owner1"));
-        owners.add(new Owner("Owner2"));
-        owners.add(new Owner("Owner3"));
+        // 고객 및 소유자 초기화
+        manager.addCustomer(new Customer("아름이"));
+        manager.addCustomer(new Customer("민석이"));
+        manager.addCustomer(new Customer("주영이"));
+        manager.addCustomer(new Customer("하랑이"));
 
-        // 레스토랑 리스트 생성
-        List<Restaurant> restaurants = new ArrayList<>();
-        restaurants.add(owners.get(0).createRestaurant("Restaurant1"));
-        restaurants.add(owners.get(0).createRestaurant("Restaurant2"));
-        restaurants.add(owners.get(1).createRestaurant("Restaurant3"));
-        restaurants.add(owners.get(1).createRestaurant("Restaurant4"));
-        restaurants.add(owners.get(2).createRestaurant("Restaurant5"));
-        restaurants.add(owners.get(2).createRestaurant("Restaurant6"));
+        manager.addOwner(new Owner("피까츄"));
+        manager.addOwner(new Owner("라이츄"));
+        manager.addOwner(new Owner("파이리"));
+
+        // 도전하라! 식당 메뉴 추가
+        manager.owner("피까츄").createRestaurant("도전하라! 식당");
+        manager.owner("피까츄").addMenuToRestaurant("도전하라! 식당", "붕어빵 맛 초코파이", 10000);
+        manager.owner("피까츄").addMenuToRestaurant("도전하라! 식당", "치즈 맛 사과", 11000);
+        manager.owner("피까츄").addMenuToRestaurant("도전하라! 식당", "핫도그 맛 아이스크림", 12000);
+        manager.owner("피까츄").addMenuToRestaurant("도전하라! 식당", "닭가슴살 맛 솜사탕", 13000);
+
+        manager.owner("피까츄").createRestaurant("마법의 빵집 빵팡");
+        manager.owner("피까츄").addMenuToRestaurant("마법의 빵집 빵팡", "꿈을 이루는 빵", 15000);
+        manager.owner("피까츄").addMenuToRestaurant("마법의 빵집 빵팡", "사랑을 찾는 빵", 16000);
+        manager.owner("피까츄").addMenuToRestaurant("마법의 빵집 빵팡", "복권에 당첨되는 빵", 17000);
+        manager.owner("피까츄").addMenuToRestaurant("마법의 빵집 빵팡", "건강을 되찾는 빵", 18000);
+
+        // 미래 식당 2042 메뉴 추가
+        manager.owner("라이츄").createRestaurant("미래 식당 2042");
+        manager.owner("라이츄").addMenuToRestaurant("미래 식당 2042", "곤충 단백질 샌드위치", 20000);
+        manager.owner("라이츄").addMenuToRestaurant("미래 식당 2042", "3D 프린팅 피자", 21000);
+        manager.owner("라이츄").addMenuToRestaurant("미래 식당 2042", "해조류 샐러드", 22000);
+        manager.owner("라이츄").addMenuToRestaurant("미래 식당 2042", "로봇이 만든 칵테일", 23000);
+        manager.owner("라이츄").addMenuToRestaurant("미래 식당 2042", "드론배달 컵라면", 24000);
+
+        // 시간 여행자의 숨겨진 맛 메뉴 추가
+        manager.owner("파이리").createRestaurant("시간 여행자의 숨겨진 맛");
+        manager.owner("파이리").addMenuToRestaurant("시간 여행자의 숨겨진 맛", "공룡 뼈 화석 스테이크", 25000);
+        manager.owner("파이리").addMenuToRestaurant("시간 여행자의 숨겨진 맛", "미래형 영양 캡슐", 26000);
+        manager.owner("파이리").addMenuToRestaurant("시간 여행자의 숨겨진 맛", "중세 시대 왕족 만찬", 27000);
+
+        manager.owner("파이리").createRestaurant("악취의 향연 식당");
+        manager.owner("파이리").addMenuToRestaurant("악취의 향연 식당", "취두부 냄새 샌드위치", 28000);
+        manager.owner("파이리").addMenuToRestaurant("악취의 향연 식당", "썩은 생선 꼬치구이", 29000);
+        manager.owner("파이리").addMenuToRestaurant("악취의 향연 식당", "땀 냄새 치즈 샐러드", 30000);
+
+        manager.owner("파이리").createRestaurant("불안정한 맛 전문점");
+        manager.owner("파이리").addMenuToRestaurant("불안정한 맛 전문점", "딱딱한 샌드위치", 31000);
+        manager.owner("파이리").addMenuToRestaurant("불안정한 맛 전문점", "끈적끈적한 롤빵", 32000);
+        manager.owner("파이리").addMenuToRestaurant("불안정한 맛 전문점", "거친 아이스크림", 33000);
+        manager.owner("파이리").addMenuToRestaurant("불안정한 맛 전문점", "미끄러운 샐러드", 34000);
 
         JFrame frame = new JFrame("Moving Character");
-        MovingCharacter movingCharacter = new MovingCharacter(restaurants, frame);
+        MovingCharacter movingCharacter = new MovingCharacter(frame);
         frame.add(movingCharacter);
         frame.setSize(800, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

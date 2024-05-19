@@ -9,6 +9,7 @@ class Owner extends Person {
     public Owner(String name) {
         super(name);
         this.restaurants = new ArrayList<>();
+        SimulationManager.getInstance().addOwner(this);
     }
 
     @Override
@@ -20,6 +21,7 @@ class Owner extends Person {
     public Restaurant createRestaurant(String restaurantName) {
         Restaurant restaurant = new Restaurant(restaurantName, this);
         restaurants.add(restaurant);
+        SimulationManager.getInstance().addRestaurant(restaurant); // SimulationManager에 레스토랑 추가
         System.out.println(getName() + " has opened a new restaurant named " + restaurantName);
         return restaurant;
     }
@@ -30,7 +32,7 @@ class Owner extends Person {
         if (restaurant != null) {
             Menu menu = new Menu(menuName, menuPrice, restaurant);
             restaurant.addMenu(menu);
-            Simulation.addMenu(menu); // Simulation 클래스의 menuList에도 메뉴 추가
+            SimulationManager.getInstance().addMenu(menu); // SimulationManager에 메뉴 추가
             System.out.println(menu.getName() + " has been added to the menu at " + restaurant.getName());
         } else {
             System.out.println("Error: No restaurant found with the name " + restaurantName);
