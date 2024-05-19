@@ -48,21 +48,7 @@ public class RestaurantInterior extends JPanel implements ActionListener {
         this.me = me;
         this.isMenuDialogOpen = true;
         setBackground(Color.WHITE);
-
         setFocusable(true);
-        addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (isMenuDialogOpen) { // 메뉴 창이 켜졌을 때만 키 입력 처리
-                    int key = e.getKeyCode();
-                    if (key >= KeyEvent.VK_0 && key <= KeyEvent.VK_9) {
-                        int menuIndex = key - KeyEvent.VK_0;
-                        orderMenu(menuIndex);
-                    }
-                }
-            }
-        });
-        
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {

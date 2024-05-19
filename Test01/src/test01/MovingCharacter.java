@@ -225,7 +225,6 @@ public class MovingCharacter extends JPanel implements ActionListener {
         repaint();
     }
 
-    // 충돌 감지 메서드
     private void checkCollision() {
         for (Restaurant restaurant : restaurants) {
             if (x < restaurant.getX() + restaurant.getSize() &&
@@ -233,10 +232,12 @@ public class MovingCharacter extends JPanel implements ActionListener {
                 y < restaurant.getY() + restaurant.getSize() &&
                 y + RECT_SIZE > restaurant.getY()) {
                 System.out.println("Collision with: " + restaurant.getName());
+                me.visitRestaurant(restaurant, restaurant.getOwner()); // visitRestaurant 호출
                 showRestaurantInterior(restaurant);
             }
         }
     }
+
 
     // 레스토랑 내부 화면으로 전환하는 메서드
     private void showRestaurantInterior(Restaurant restaurant) {
