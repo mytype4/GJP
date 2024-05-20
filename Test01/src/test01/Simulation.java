@@ -1,11 +1,14 @@
 package test01;
 
 import java.util.Scanner;
+import java.time.LocalDateTime;
 
 public class Simulation {
-
     public static void main(String[] args) {
         SimulationManager manager = SimulationManager.getInstance();
+
+        // 데이터베이스 초기화 (테이블만 생성, 기존 데이터는 유지)
+        manager.getOrderDB().initializeDatabase();
 
         // Customer 객체 리스트 생성
         manager.addCustomer(new Customer("아름이"));
@@ -67,6 +70,8 @@ public class Simulation {
 
         while (true) {
             String input = scanner.nextLine();
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            System.out.println("현재 시간: " + currentDateTime);
             if ("exit".equalsIgnoreCase(input)) {
                 break;
             }

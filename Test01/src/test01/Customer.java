@@ -1,5 +1,6 @@
 package test01;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Executors;
@@ -28,8 +29,8 @@ class Customer extends Person {
             leaveRestaurant();
         }
         currentRestaurant = restaurant;
-        currentOwner = owner;
         restaurant.addCustomer(this);
+        currentOwner = owner;
     }
 
     // 레스토랑에서 나가기
@@ -50,19 +51,17 @@ class Customer extends Person {
         }
 
         List<Menu> menus = currentRestaurant.getMenus();
-
         for (Menu menu : menus) {
             if (menu.getName().equals(menuName)) {
                 System.out.println(getName() + " has ordered " + menuName + " at " + restaurantName + ".");
                 this.pay(currentOwner, menu.getPrice());
-                return;  // 메뉴를 찾았으면 메서드를 종료
+                LocalDateTime orderTime = LocalDateTime.now();
+                SimulationManager.getInstance().getOrderDB().addOrder(getName(), restaurantName, menuName, menu.getPrice(), orderTime); // 주문 정보 데이터베이스에 추가
+                return;
             }
         }
-
         System.out.println("Menu item " + menuName + " not found in " + restaurantName);
     }
-
-
 
     // 메뉴를 임의로 선택하고 행동하는 메서드
     public void autoSelectAndOrder() {
@@ -71,6 +70,7 @@ class Customer extends Person {
 
         if (menuList.isEmpty()) {
             System.out.println("No menu items available.");
+            return;
         }
 
         // 랜덤으로 메뉴를 선택

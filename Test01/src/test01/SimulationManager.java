@@ -10,8 +10,11 @@ public class SimulationManager {
     private List<Owner> owners = new ArrayList<>();
     private List<Restaurant> restaurants = new ArrayList<>();
     private List<Menu> menuList = new ArrayList<>();
+    private OrderDB orderDB;
 
-    private SimulationManager() {}
+    private SimulationManager() {
+        orderDB = new OrderDB();
+    }
 
     public static SimulationManager getInstance() {
         if (instance == null) {
@@ -60,5 +63,9 @@ public class SimulationManager {
 
     public List<Menu> getMenuList() {
         return menuList;
+    }
+
+    public OrderDB getOrderDB() {
+        return orderDB;
     }
 }
