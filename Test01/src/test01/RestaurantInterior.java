@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import java.text.DecimalFormat;
 
 public class RestaurantInterior extends JPanel implements ActionListener {
     private static final long serialVersionUID = 1L;
@@ -27,6 +28,7 @@ public class RestaurantInterior extends JPanel implements ActionListener {
     private JFrame frame;
     private MovingCharacter movingCharacterPanel;
     private Me me;
+    private DecimalFormat decimalFormat = new DecimalFormat("#,##0");
 
     // 출구 크기 설정
     private final int EXIT_WIDTH = 100; // 출구의 너비
@@ -41,6 +43,7 @@ public class RestaurantInterior extends JPanel implements ActionListener {
     private boolean isMenuDialogOpen = false; // 메뉴 창이 열려있는지 여부를 추적
     private boolean hasLeftDesk = false; // 네모가 데스크를 벗어났는지 여부를 추적
     private JDialog menuDialog;
+    private boolean hasExited = false; // 출구를 나갔는지 여부를 추적
 
     public RestaurantInterior(Restaurant restaurant, JFrame frame, MovingCharacter movingCharacterPanel, Me me) {
         this.restaurant = restaurant;
@@ -127,6 +130,10 @@ public class RestaurantInterior extends JPanel implements ActionListener {
         // 데스크를 그립니다 (중앙에 위치한 직사각형)
         g.setColor(Color.BLACK);
         g.fillRect(DESK_X, DESK_Y, DESK_WIDTH, DESK_HEIGHT);
+        
+        // 화면 좌 상단에 me 객체의 잔액을 출력합니다.
+        g.setColor(Color.BLACK);
+        g.drawString("Balance: " + decimalFormat.format(me.getBankAccount()) + " 원", 20, 40); // 좌표 (10, 20)에 잔액 출력
     }
 
     @Override
@@ -149,9 +156,12 @@ public class RestaurantInterior extends JPanel implements ActionListener {
 
     // 출구 충돌 감지 메서드
     private void checkExit() {
-        if (redRectX >= (getWidth() - EXIT_WIDTH) / 2 &&
+        if (!hasExited && 
+            redRectX >= (getWidth() - EXIT_WIDTH) / 2 &&
             redRectX <= (getWidth() + EXIT_WIDTH) / 2 - RECT_SIZE &&
             redRectY >= getHeight() - EXIT_HEIGHT - RECT_SIZE) {
+            
+            hasExited = true; // 출구를 나갔음을 표시
             timer.stop(); // 타이머 정지
             me.leaveRestaurant(); // leaveRestaurant 호출
             movingCharacterPanel.setPositionNearRestaurant(restaurant);

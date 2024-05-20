@@ -13,6 +13,7 @@ import java.util.Random;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import java.text.DecimalFormat;
 
 public class MovingCharacter extends JPanel implements ActionListener {
     private static final long serialVersionUID = 1L;
@@ -26,11 +27,14 @@ public class MovingCharacter extends JPanel implements ActionListener {
     private List<Restaurant> restaurants;
     private Me me;
     private boolean insideBuilding = false;
+    private DecimalFormat decimalFormat = new DecimalFormat("#,##0");
+    private boolean hasSetPosition = false; // 위치 설정 여부를 추적
 
     public MovingCharacter(JFrame frame) {
         this.frame = frame;
         this.restaurants = SimulationManager.getInstance().getRestaurants();
         this.me = new Me("MyCharacter");
+        setBackground(Color.WHITE);
         setFocusable(true);
         addKeyListener(new KeyAdapter() {
             @Override
@@ -144,6 +148,12 @@ public class MovingCharacter extends JPanel implements ActionListener {
     }
     
     public void setPositionNearRestaurant(Restaurant restaurant) {
+        if (hasSetPosition) {
+            return; // 이미 위치가 설정되었으므로 더 이상 실행하지 않음
+        }
+        hasSetPosition = true; // 위치가 설정되었음을 표시
+        
+        System.out.println("레스토랑 주변 생성 호출 됐어용 ~");
         Random rand = new Random();
         int randX, randY;
         boolean overlap;
@@ -208,7 +218,12 @@ public class MovingCharacter extends JPanel implements ActionListener {
             g.setColor(Color.BLACK);
             g.drawString(restaurant.getName(), restaurant.getX() + 5, restaurant.getY() - 5);
         }
+
+        // 화면 좌 상단에 me 객체의 잔액을 출력합니다.
+        g.setColor(Color.BLACK);
+        g.drawString("Balance: " + decimalFormat.format(me.getBankAccount()) + " 원", 20, 40); // 좌표 (10, 20)에 잔액 출력
     }
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
