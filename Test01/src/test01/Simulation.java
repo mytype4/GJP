@@ -9,6 +9,7 @@ public class Simulation {
 
         // 데이터베이스 초기화 (테이블만 생성, 기존 데이터는 유지)
         manager.getOrderDB().initializeDatabase();
+        manager.getOrderDB().clearOrderTableUsingTruncate();
 
         // Customer 객체 리스트 생성
         manager.addCustomer(new Customer("아름이"));

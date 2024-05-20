@@ -206,4 +206,40 @@ public class OrderDB {
 
         return orders;
     }
+
+    // 테이블 데이터 삭제
+    public void clearOrderTable() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+            String query = "DELETE FROM order_info";
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate(query);
+
+            stmt.close();
+            conn.close();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 테이블 데이터 삭제 (TRUNCATE 사용)
+    public void clearOrderTableUsingTruncate() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+            String query = "TRUNCATE TABLE order_info";
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate(query);
+
+            stmt.close();
+            conn.close();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
