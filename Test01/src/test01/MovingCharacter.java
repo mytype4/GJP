@@ -25,6 +25,7 @@ public class MovingCharacter extends JPanel implements ActionListener {
     private JFrame frame; // JFrame 객체를 저장
     private List<Restaurant> restaurants;
     private Me me;
+    private boolean insideBuilding = false;
 
     public MovingCharacter(JFrame frame) {
         this.frame = frame;
@@ -226,19 +227,27 @@ public class MovingCharacter extends JPanel implements ActionListener {
     }
 
     private void checkCollision() {
+        boolean collided = false;
         for (Restaurant restaurant : restaurants) {
             if (x < restaurant.getX() + restaurant.getSize() &&
                 x + RECT_SIZE > restaurant.getX() &&
                 y < restaurant.getY() + restaurant.getSize() &&
                 y + RECT_SIZE > restaurant.getY()) {
-                System.out.println("Collision with: " + restaurant.getName());
-                me.visitRestaurant(restaurant, restaurant.getOwner()); // visitRestaurant 호출
-                showRestaurantInterior(restaurant);
+                collided = true;
+                if (!insideBuilding) {
+                    System.out.println("Collision with: " + restaurant.getName());
+                    me.visitRestaurant(restaurant, restaurant.getOwner()); // visitRestaurant 호출
+                    showRestaurantInterior(restaurant);
+                    insideBuilding = true;
+                }
+                break;
             }
         }
+        if (!collided) {
+            insideBuilding = false;
+        }
     }
-
-
+    
     // 레스토랑 내부 화면으로 전환하는 메서드
     private void showRestaurantInterior(Restaurant restaurant) {
         timer.stop();

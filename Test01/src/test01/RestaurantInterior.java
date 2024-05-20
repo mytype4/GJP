@@ -7,7 +7,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.List;
-
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -40,38 +39,43 @@ public class RestaurantInterior extends JPanel implements ActionListener {
     private final int DESK_Y = 100; // 상단에서 100픽셀 떨어진 위치
 
     private boolean isMenuDialogOpen = false; // 메뉴 창이 열려있는지 여부를 추적
+    private boolean hasLeftDesk = false; // 네모가 데스크를 벗어났는지 여부를 추적
+    private JDialog menuDialog;
 
     public RestaurantInterior(Restaurant restaurant, JFrame frame, MovingCharacter movingCharacterPanel, Me me) {
         this.restaurant = restaurant;
         this.frame = frame;
         this.movingCharacterPanel = movingCharacterPanel;
         this.me = me;
-        this.isMenuDialogOpen = true;
         setBackground(Color.WHITE);
         setFocusable(true);
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 int key = e.getKeyCode();
-                switch (key) {
-                    case KeyEvent.VK_LEFT:
-                        leftPressed = true;
-                        break;
-                    case KeyEvent.VK_RIGHT:
-                        rightPressed = true;
-                        break;
-                    case KeyEvent.VK_UP:
-                        upPressed = true;
-                        break;
-                    case KeyEvent.VK_DOWN:
-                        downPressed = true;
-                        break;
-                    case KeyEvent.VK_ESCAPE:
-                        if (menuDialog != null && menuDialog.isVisible()) {
-                            menuDialog.dispose();
-                            isMenuDialogOpen = false; // 메뉴 창이 닫혔음을 표시
-                        }
-                        break;
+                if (isMenuDialogOpen) {
+                    if (key >= KeyEvent.VK_1 && key <= KeyEvent.VK_9) {
+                        int menuIndex = key - KeyEvent.VK_1; // 1부터 9까지의 키 입력 처리
+                        orderMenu(menuIndex);
+                        closeMenuDialog();
+                    } else if (key == KeyEvent.VK_ESCAPE) {
+                        closeMenuDialog();
+                    }
+                } else {
+                    switch (key) {
+                        case KeyEvent.VK_LEFT:
+                            leftPressed = true;
+                            break;
+                        case KeyEvent.VK_RIGHT:
+                            rightPressed = true;
+                            break;
+                        case KeyEvent.VK_UP:
+                            upPressed = true;
+                            break;
+                        case KeyEvent.VK_DOWN:
+                            downPressed = true;
+                            break;
+                    }
                 }
             }
 
@@ -149,6 +153,7 @@ public class RestaurantInterior extends JPanel implements ActionListener {
             redRectX <= (getWidth() + EXIT_WIDTH) / 2 - RECT_SIZE &&
             redRectY >= getHeight() - EXIT_HEIGHT - RECT_SIZE) {
             timer.stop(); // 타이머 정지
+            me.leaveRestaurant(); // leaveRestaurant 호출
             movingCharacterPanel.setPositionNearRestaurant(restaurant);
             movingCharacterPanel.resetKeyState(); // 키 상태 초기화
             frame.setContentPane(movingCharacterPanel);
@@ -158,35 +163,34 @@ public class RestaurantInterior extends JPanel implements ActionListener {
         }
     }
 
-    // 데스크 충돌 감지 메서드
     private void checkDeskCollision() {
         if (redRectX < DESK_X + DESK_WIDTH &&
             redRectX + RECT_SIZE > DESK_X &&
             redRectY < DESK_Y + DESK_HEIGHT &&
             redRectY + RECT_SIZE > DESK_Y) {
-            if (!isMenuDialogOpen) {
+            if (!isMenuDialogOpen && hasLeftDesk) {
                 resetKeyState(); // 키 상태 초기화
                 showMenuDialog(); // 메뉴 창 표시
+                hasLeftDesk = false; // 메뉴 창이 열렸을 때 플래그를 false로 설정
             }
         } else {
-            isMenuDialogOpen = false; // 네모가 데스크를 벗어남
+            hasLeftDesk = true; // 네모가 데스크를 벗어남
         }
     }
 
-    // 메뉴 창 표시 메서드
-    private JDialog menuDialog;
-    
     private void showMenuDialog() {
+        isMenuDialogOpen = true; // 메뉴 창이 열렸음을 표시
+        
         if (menuDialog == null || !menuDialog.isVisible()) {
-            StringBuilder menuText = new StringBuilder("<html><body style='text-align:center; font-size:14px;'>")
-                .append("<h2 style='font-size:18px;'>")
+            StringBuilder menuText = new StringBuilder("<html><body style='text-align:center; font-size:16px;'>")
+                .append("<h2 style='font-size:20px;'>")
                 .append(restaurant.getName())
                 .append(" 메뉴</h2><div style='text-align:center;'>"); // 제목 중앙 정렬 및 글자 크기 조정
 
             List<Menu> menus = restaurant.getMenus();
             for (int i = 0; i < menus.size(); i++) {
                 Menu menu = menus.get(i);
-                menuText.append("<p style='margin: 5px 0; font-size:16px;'>")
+                menuText.append("<p style='margin: 10px 0; font-size:18px;'>")
                         .append((i + 1)).append(". ")
                         .append(menu.getName())
                         .append(": ")
@@ -206,20 +210,34 @@ public class RestaurantInterior extends JPanel implements ActionListener {
                 @Override
                 public void keyPressed(KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                        menuDialog.dispose();
-                        isMenuDialogOpen = false; // 메뉴 창이 닫혔음을 표시
+                        closeMenuDialog();
+                    } else if (e.getKeyCode() >= KeyEvent.VK_1 && e.getKeyCode() <= KeyEvent.VK_9) {
+                        int menuIndex = e.getKeyCode() - KeyEvent.VK_1; // 1부터 9까지의 키 입력 처리
+                        orderMenu(menuIndex);
+                        closeMenuDialog();
                     }
                 }
             });
-
             menuDialog.setVisible(true);
             menuDialog.requestFocusInWindow(); // 메뉴 다이얼로그가 키 이벤트를 받을 수 있도록 포커스를 요청
-
-            isMenuDialogOpen = true; // 메뉴 창이 열렸음을 표시
+            stopTimer(); // 메뉴 창이 열릴 때 타이머 정지
         }
     }
 
-    
+
+    // 메뉴 창 닫기 메서드
+    private void closeMenuDialog() {
+        if (menuDialog != null && menuDialog.isVisible()) {
+            menuDialog.dispose();
+            isMenuDialogOpen = false; // 메뉴 창이 닫혔음을 표시
+            resetKeyState(); // 키 상태 초기화
+            
+            timer = new Timer(10, this); // 5점 짜리 문제 해결
+            startTimer(); // 타이머 재시작
+            requestFocusInWindow(); // 포커스를 다시 패널로 옮김
+        }
+    }
+
     private void orderMenu(int menuIndex) {
         List<Menu> menus = restaurant.getMenus();
         if (menuIndex >= 0 && menuIndex < menus.size()) {
@@ -239,7 +257,7 @@ public class RestaurantInterior extends JPanel implements ActionListener {
     }
 
     public void startTimer() {
-        timer.start(); // 타이머 시작
+    	timer.start(); // 타이머 시작
     }
 
     public void stopTimer() {
