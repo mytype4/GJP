@@ -29,6 +29,7 @@ public class MovingCharacter extends JPanel implements ActionListener {
     private boolean insideBuilding = false;
     private DecimalFormat decimalFormat = new DecimalFormat("#,##0");
     private boolean hasSetPosition = false; // 위치 설정 여부를 추적
+    private boolean initialPositionSet = false; // 초기 위치 설정 여부를 추적
 
     public MovingCharacter(JFrame frame) {
         this.frame = frame;
@@ -87,6 +88,7 @@ public class MovingCharacter extends JPanel implements ActionListener {
                     setRandomPosition(restaurant);
                 }
                 setInitialCharacterPosition();  // 레스토랑 객체가 설정된 후 빨간 네모의 초기 위치 설정
+                initialPositionSet = true; // 초기 위치가 설정되었음을 표시
                 repaint();
             }
         });
@@ -153,7 +155,6 @@ public class MovingCharacter extends JPanel implements ActionListener {
         }
         hasSetPosition = true; // 위치가 설정되었음을 표시
         
-        System.out.println("레스토랑 주변 생성 호출 됐어용 ~");
         Random rand = new Random();
         int randX, randY;
         boolean overlap;
@@ -204,6 +205,11 @@ public class MovingCharacter extends JPanel implements ActionListener {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        
+        // 초기 위치가 설정되지 않은 경우 그리기를 수행하지 않음
+        if (!initialPositionSet) {
+            return;
+        }
 
         // 빨간 네모를 그립니다.
         g.setColor(Color.RED);
@@ -227,6 +233,10 @@ public class MovingCharacter extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+    	if (!initialPositionSet) {
+            return; // 초기 위치가 설정되지 않았으면 동작하지 않음
+        }
+    	
         if (leftPressed) x -= STEP;
         if (rightPressed) x += STEP;
         if (upPressed) y -= STEP;
