@@ -6,7 +6,6 @@ import java.util.List;
 class Restaurant {
     private final String name;
     private final Owner owner;
-    private List<PartTimer> partTimers;
     private List<Customer> customers;
     private List<Menu> menus;
     private int x, y;
@@ -35,7 +34,6 @@ class Restaurant {
     public Restaurant() {
         this.name = "";
         this.owner = null;
-        this.partTimers = new ArrayList<>();
         this.customers = new ArrayList<>();
         this.menus = new ArrayList<>();
         SimulationManager.getInstance().addRestaurant(this); // SimulationManager에 추가
@@ -44,7 +42,6 @@ class Restaurant {
     public Restaurant(String name, Owner owner) {
         this.name = name;
         this.owner = owner;
-        this.partTimers = new ArrayList<>();
         this.customers = new ArrayList<>();
         this.menus = new ArrayList<>();
         SimulationManager.getInstance().addRestaurant(this); // SimulationManager에 추가
@@ -60,11 +57,6 @@ class Restaurant {
 
     public List<Menu> getMenus() {
         return menus;
-    }
-
-    // 파트타이머 목록에 추가
-    public void addPartTimer(PartTimer partTimer) {
-        partTimers.add(partTimer);
     }
 
     // 고객 목록에 추가
@@ -87,9 +79,6 @@ class Restaurant {
     public void startService() {
         System.out.println(name + " is now open for service.");
         owner.manageRestaurant();
-        for (PartTimer partTimer : partTimers) {
-            partTimer.work();
-        }
     }
 
     // 현재 고객 목록

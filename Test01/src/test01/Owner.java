@@ -49,12 +49,6 @@ class Owner extends Person {
         return null;
     }
 
-    // 특정 레스토랑에 PartTimer 고용
-    public void hirePartTimer(Restaurant restaurant, PartTimer partTimer) {
-        restaurant.addPartTimer(partTimer);
-        System.out.println(partTimer.getName() + " has been hired as a part-timer at " + restaurant.getName());
-    }
-
     public void manageRestaurant() {
         // 레스토랑 관리 로직
     }
