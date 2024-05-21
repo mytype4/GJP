@@ -341,6 +341,12 @@ public class MovingCharacter extends JPanel implements ActionListener {
         manager.owner("파이리").addMenuToRestaurant("불안정한 맛 전문점", "끈적끈적한 롤빵", 32000);
         manager.owner("파이리").addMenuToRestaurant("불안정한 맛 전문점", "거친 아이스크림", 33000);
         manager.owner("파이리").addMenuToRestaurant("불안정한 맛 전문점", "미끄러운 샐러드", 34000);
+        
+//        manager.owner("파이리").createRestaurant("test");
+//        manager.owner("파이리").addMenuToRestaurant("test", "딱딱한 샌드위치", 31000);
+//        manager.owner("파이리").addMenuToRestaurant("test", "끈적끈적한 롤빵", 32000);
+//        manager.owner("파이리").addMenuToRestaurant("test", "거친 아이스크림", 33000);
+//        manager.owner("파이리").addMenuToRestaurant("test", "미끄러운 샐러드", 34000);
 
         JFrame frame = new JFrame("Moving Character");
         MovingCharacter movingCharacter = new MovingCharacter(frame);
